@@ -1,0 +1,52 @@
+{% extends 'clinic/base.html' %}
+{% block title %}{% if object %}Edit{% else %}New{% endif %} Appointment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header" style="background-color: var(--ucla-blue); color: white;">
+                <h2 class="mb-0">
+                    {% if object %}Edit Appointment{% else %}Book New Appointment{% endif %}
+                </h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="pet" class="form-label">Pet</label>
+                            {{ form.pet }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="vet" class="form-label">Vet</label>
+                            {{ form.vet }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="datetime-local" class="form-control" 
+                                   name="date" id="id_date" 
+                                   value="{{ form.date.value|default:''|date:'Y-m-d\TH:i' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reason" class="form-label">Reason</label>
+                            {{ form.reason }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'appointment-list' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if object %}Update{% else %}Create{% endif %} Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

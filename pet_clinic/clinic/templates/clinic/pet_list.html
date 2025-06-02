@@ -1,0 +1,31 @@
+{% extends 'clinic/base.html' %}
+{% block title %}Our Pets{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Our Furry Patients</h1>
+    <a href="#" class="btn btn-primary">+ Add Pet</a>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for pet in object_list %}
+    <div class="col">
+        <div class="card h-100 pet-card">
+            <div class="card-body">
+                <h3 class="card-title">{{ pet.name }}</h3>
+                <p class="card-text">
+                    <span class="badge rounded-pill mb-2" style="background-color: var(--ucla-blue);">
+                        {{ pet.species }}
+                    </span>
+                    <br>
+                    <strong>Breed:</strong> {{ pet.breed }}<br>
+                    <strong>Owner:</strong> {{ pet.owner.fname }} {{ pet.owner.lname }}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{% url 'pet-detail' pet.pk %}" class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

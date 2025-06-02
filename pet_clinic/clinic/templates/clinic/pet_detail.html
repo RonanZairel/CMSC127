@@ -1,0 +1,87 @@
+{% extends 'clinic/base.html' %}
+{% block title %}{{ pet.name }}'s Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card pet-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">{{ pet.name }}'s Profile</h2>
+                <div class="btn-group">
+                    <a href="{% url 'pet-update' pet.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="{% url 'pet-delete' pet.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="pet-avatar mb-3" style="
+                            width: 150px; 
+                            height: 150px; 
+                            background-color: var(--parrot-pink);
+                            border-radius: 50%;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 3rem;
+                            color: white;
+                        ">
+                            {{ pet.name|first|upper }}
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Species</th>
+                                    <td>{{ pet.species }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Breed</th>
+                                    <td>{{ pet.breed }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Owner</th>
+                                    <td>
+                                        <a href="#">{{ pet.owner.fname }} {{ pet.owner.lname }}</a>
+                                        <br>
+                                        <small class="text-muted">{{ pet.owner.email }}</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Age</th>
+                                    <td>3 years (example)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Appointment History</h3>
+            </div>
+            <div class="card-body">
+                {% if pet.appointments.all %}
+                <div class="list-group">
+                    {% for appointment in pet.appointments.all %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ appointment.reason }}</h5>
+                            <small>{{ appointment.date|date:"M d, Y" }}</small>
+                        </div>
+                        <p class="mb-1">With Dr. {{ appointment.vet.name }}</p>
+                        <small>Status: Completed</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No appointment history found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'clinic/base.html' %}
+{% block title %}{% if object %}Edit{% else %}New{% endif %} Pet{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>{% if object %}Edit{% else %}Add New{% endif %} Pet</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                        <a href="{% if object %}{% url 'pet-detail' object.pk %}{% else %}{% url 'pet-list' %}{% endif %}" 
+                           class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
