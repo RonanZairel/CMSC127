@@ -1,0 +1,419 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawsitibo Veterinary Clinic</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- landing/main -->
+    <!-- navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-paw"></i>
+                <span>Pawsitibo Clinic</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#vets" class="nav-link">Our Vets</a>
+                <a href="#about" class="nav-link">About</a>
+                <div class="auth-buttons">
+                    <button class="btn-secondary" id="loginNavBtn">Login</button>
+                    <button class="btn-primary" id="signupNavBtn">Sign Up</button>
+                </div>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+    <main>
+    <!-- hero section -->
+    <section id="home" class="hero">
+        <div class="hero-content-container"> 
+            <div class="hero-text-content">
+                <h1>Compassionate Care for Your Beloved Pets</h1>
+                <p>Professional veterinary services with experienced doctors and modern facilities</p>
+                <div class="hero-buttons">
+                    <button class="btn-primary btn-large" id="heroBookAppointmentBtn">Book Appointment</button>
+                    <button class="btn-secondary btn-large" onclick="scrollToSection('services')">Our Services</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-placeholder">
+                    <i class="fas fa-dog"></i>
+                    <i class="fas fa-cat"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- services section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2>Our Services</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <i class="fas fa-stethoscope"></i>
+                    <h3>General Check-ups</h3>
+                    <p>Comprehensive health examinations for your pets</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-syringe"></i>
+                    <h3>Vaccinations</h3>
+                    <p>Complete vaccination programs to keep pets healthy</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-user-md"></i>
+                    <h3>Surgery</h3>
+                    <p>Advanced surgical procedures with modern equipment</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-pills"></i>
+                    <h3>Emergency Care</h3>
+                    <p>24/7 emergency services for urgent situations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- vets section -->
+    <section id="vets" class="vets">
+        <div class="container">
+            <h2>Meet Our Veterinarians</h2>
+            <div class="vets-grid" id="vetsGrid">
+                <!-- loaded by script.js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- about section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2>About Pawsitibo Clinic</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>With over 15 years of experience, Pawsitibo Clinic has been serving the community with exceptional veterinary care. Our team of dedicated professionals is committed to providing the highest quality medical care for your beloved pets.</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="stat-number">1000+</span>
+                            <span class="stat-label">Happy Pets</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">4</span>
+                            <span class="stat-label">Expert Vets</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">15+</span>
+                            <span class="stat-label">Years Experience</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- login modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-id="loginModal">×</span>
+            <h2>Login to Your Account</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email<span class="required-asterisk">*</span></label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password<span class="required-asterisk">*</span></label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+                <p class="form-switch">Don't have an account? <a href="#" id="switchToSignupLink">Sign up here</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-id="signupModal">×</span>
+            <h2>Create Your Account</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="firstName">First Name<span class="required-asterisk">*</span></label>
+                    <input type="text" id="firstName" placeholder="e.g., Juan" required>
+                </div>
+                <div class="form-group">
+                    <label for="middleInitial">Middle Initial</label>
+                    <input type="text" id="middleInitial" placeholder="e.g., A" maxlength="1">
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name<span class="required-asterisk">*</span></label>
+                    <input type="text" id="lastName" placeholder="e.g., Dela Cruz" required>
+                </div>
+                <div class="form-group">
+                    <label for="suffix">Suffix</label>
+                    <input type="text" id="suffix" placeholder="e.g., Jr., Sr., III">
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email<span class="required-asterisk">*</span></label>
+                    <input type="email" id="signupEmail" placeholder="e.g., juandelacruz@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number<span class="required-asterisk">*</span></label>
+                    <input type="tel" id="phone" placeholder="e.g., 555-123-4567" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password<span class="required-asterisk">*</span></label>
+                    <input type="password" id="signupPassword" minlength="6" required>
+                </div>
+                <button type="submit" class="btn-primary">Sign Up</button>
+                <p class="form-switch">Already have an account? <a href="#" id="switchToLoginLink">Login here</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- user dashboard -->
+    <div id="userDashboard" class="dashboard" style="display: none;">
+        <div class="dashboard-header">
+            <h1>Welcome, <span id="userName"></span>!</h1>
+            <button class="btn-secondary" id="logoutUserBtn">Logout</button>
+        </div>
+        
+        <div class="dashboard-tabs">
+            <button class="tab-btn active" data-tab="pets">My Pets</button>
+            <button class="tab-btn" data-tab="appointments">Appointments</button>
+            <button class="tab-btn" data-tab="book">Book Appointment</button>
+        </div>
+
+        <!-- pets tab -->
+        <div id="petsTab" class="tab-content active">
+            <div class="section-header">
+                <h2>My Pets</h2>
+                <button class="btn-primary" id="userAddPetBtn">Add New Pet</button>
+            </div>
+            <div class="pets-list-wrapper">
+                <div id="petsList" class="pets-list">
+                    <!-- loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- appointments tab -->
+        <div id="appointmentsTab" class="tab-content">
+            <h2>My Appointments</h2>
+            <div id="appointmentsList" class="appointments-list">
+                <!-- loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- book an appointment tab -->
+        <div id="bookTab" class="tab-content">
+            <h2 id="bookingFormTitle">Book New Appointment</h2>
+            <form id="bookingForm" class="booking-form">
+                <input type="hidden" id="editingAppointmentId">
+                <div class="form-group">
+                    <label for="petSelect">Select Pet<span class="required-asterisk">*</span></label>
+                    <select id="petSelect" required>
+                        <option value="">Choose a pet...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vetSelect">Select Veterinarian<span class="required-asterisk">*</span></label>
+                    <select id="vetSelect" required>
+                        <option value="">Choose a veterinarian...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDate">Date<span class="required-asterisk">*</span></label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentTime">Time<span class="required-asterisk">*</span></label>
+                    <select id="appointmentTime" required>
+                        <option value="">Select time...</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Reason for Visit</label>
+                    <textarea id="reason" placeholder="Describe the reason for the appointment" required></textarea>
+                </div>
+                 <div class="form-group" id="appointmentStatusGroup" style="display:none;">
+                    <label for="appointmentStatus">Status</label>
+                    <select id="appointmentStatus">
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary" id="bookingSubmitBtn">Book Appointment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- admin dashboard -->
+    <div id="adminDashboard" class="dashboard" style="display: none;">
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <button class="btn-secondary" id="logoutAdminBtn">Logout</button>
+        </div>
+        
+        <div class="dashboard-tabs">
+            <button class="tab-btn active" data-admin-tab="pets">All Pets</button>
+            <button class="tab-btn" data-admin-tab="vets">Veterinarians</button>
+            <button class="tab-btn" data-admin-tab="appointments">All Appointments</button>
+        </div>
+
+        <!-- admin pets tab -->
+        <div id="adminPetsTab" class="tab-content active">
+            <div class="section-header">
+                <h2>All Pets</h2>
+                <!-- admin can add pets for any user, can be removed if pets are added by users only -->
+                <!-- <button class="btn-primary" onclick="showAddPetModal()">Add New Pet</button> -->
+            </div>
+            <div id="adminPetsList" class="admin-list">
+                <!-- loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- admin vets tab -->
+        <div id="adminVetsTab" class="tab-content">
+            <div class="section-header">
+                <h2>Veterinarians</h2>
+                <button class="btn-primary" id="adminAddVetBtn">Add New Vet</button>
+            </div>
+            <div id="adminVetsList" class="admin-list">
+                <!-- loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- admin appointments tab -->
+        <div id="adminAppointmentsTab" class="tab-content">
+            <h2>All Appointments</h2>
+            <div id="adminAppointmentsList" class="admin-list">
+                <!-- loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- add/edit pet modal -->
+    <div id="addPetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-id="addPetModal">×</span>
+            <h2 id="petModalTitle">Add New Pet</h2>
+            <form id="addPetForm">
+                <input type="hidden" id="editingPetId">
+                <div class="form-group">
+                    <label for="petName">Pet Name</label>
+                    <input type="text" id="petName" required>
+                </div>
+                <div class="form-group">
+                    <label for="species">Species</label>
+                    <select id="species" required>
+                        <option value="">Select species...</option>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Bird">Bird</option>
+                        <option value="Rabbit">Rabbit</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="breed">Breed</label>
+                    <input type="text" id="breed" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" min="0">
+                </div>
+                <button type="submit" class="btn-primary" id="petFormSubmitBtn">Add Pet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- add/edit pet modal -->
+    <div id="addVetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-id="addVetModal">×</span>
+            <h2 id="vetModalTitle">Add New Veterinarian</h2>
+            <form id="addVetForm">
+                <input type="hidden" id="editingVetId">
+                <div class="form-group">
+                    <label for="vetName">Full Name</label>
+                    <input type="text" id="vetName" required>
+                </div>
+                <div class="form-group">
+                    <label for="specialization">Specialization (comma-separated if multiple)</label>
+                    <input type="text" id="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label for="experience">Years of Experience</label>
+                    <input type="number" id="experience" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea id="bio" placeholder="Brief description about the veterinarian" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary" id="vetFormSubmitBtn">Add Veterinarian</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- booking modal for guests -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-id="bookingModal">×</span>
+            <h2>Book an Appointment</h2>
+            <p>Please log in or sign up to book an appointment for your pet.</p>
+            <div class="modal-buttons">
+                <button class="btn-primary" id="bookingModalSignupBtn">Sign Up</button>
+                <button class="btn-secondary" id="bookingModalLoginBtn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-paw"></i> Pawsitibo Clinic
+                </div>
+                <div class="footer-links">
+                    <a href="#about">About Us</a>
+                    <a href="#services">Services</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© <span id="currentYear"></span> Pawsitibo Clinic. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>
+

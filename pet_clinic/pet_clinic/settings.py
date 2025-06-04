@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x8yqap@(ak-uwi)5l67eavqnwv%ga81l&j+m652n0pt0!=a_cl'
+SECRET_KEY = 'django-insecure-your-secret-key-here'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -33,15 +33,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'clinic.apps.ClinicConfig',
-    'crispy_forms',
-    'crispy_bootstrap4',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'clinic',
+    'crispy_forms',
 ]
 
 
@@ -63,10 +62,11 @@ ROOT_URLCONF = 'pet_clinic.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -85,6 +85,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,  # in seconds
+        }
     }
 }
 
@@ -92,14 +95,14 @@ DATABASES = {
 # settings.py
 
 # Base URL for static files
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 
 # Where Django will collect static files for production (when you run collectstatic)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Additional directories to search for static files (during development)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'clinic/static'),  # Path to your app's static folder
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 # Password validation
