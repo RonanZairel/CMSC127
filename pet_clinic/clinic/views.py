@@ -1,38 +1,77 @@
-from django.shortcuts import render
-from django.views.generic import (ListView, 
-                                  DetailView,
-                                  CreateView
-                                  )
-from django.http import HttpResponse
-from .models import Post
-
-# Create your views here.
-def home(request):
-    context = { #this is out context dictionary which has the key 'post'
-        'posts': Post.objects.all()
-    }
-    return render(request, 'clinic/home.html', context)
+from django.views.generic import (
+    ListView, DetailView, CreateView,
+    UpdateView, DeleteView
+)
+from .models import Pet, Vet, Appointment
+from django.urls import reverse_lazy
+from django.contrib.messages.views import SuccessMessageMixin
 
 
-class PostListView(ListView):
-    model = Post
-    template_name = 'clinic/home.html' # <app>/<model>_<viewtype>.html
-    context_object_name = 'posts'
-    ordering = ['-date_posted']
 
-class PostDetailView(DetailView):
-    model = Post
+class HomeView(ListView):
+    model = Appointment
+    template_name = 'clinic/home.html'
+    context_object_name = 'appointments'
+    ordering = ['-date']
 
-class PostCreateView(CreateView):
-    model = Post
-    fields = ['title', 'content']
+class PetListView(ListView):
+    model = Pet
+    template_name = 'clinic/pet_list.html'
 
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-    
-    
+class PetDetailView(DetailView):
+    model = Pet
+    template_name = 'clinic/pet_detail.html' 
+    context_object_name = 'pet' 
 
-    
-def about(request):
-    return render(request,'clinic/about.html', {'title': 'About'})
+class VetListView(ListView):
+    model = Vet
+    template_name = 'clinic/vet_list.html'
+
+
+class PetCreateView(CreateView):
+    model = Pet
+    fields = ['name', 'species', 'breed', 'owner']
+    template_name = 'clinic/pet_form.html'
+    success_url = reverse_lazy('pet-list')
+
+class PetUpdateView(UpdateView):
+    model = Pet
+    fields = ['name', 'species', 'breed', 'owner']
+    template_name = 'clinic/pet_form.html'
+    success_url = reverse_lazy('pet-list')
+
+class PetDeleteView(DeleteView):
+    model = Pet
+    template_name = 'clinic/pet_confirm_delete.html'
+    success_url = reverse_lazy('pet-list')
+
+class AppointmentListView(ListView):
+    model = Appointment
+    template_name = 'clinic/appointment_list.html'
+    context_object_name = 'appointments'
+    ordering = ['-date']
+    paginate_by = 10
+
+class AppointmentCreateView(SuccessMessageMixin, CreateView):
+    model = Appointment
+    fields = ['pet', 'vet', 'date', 'reason']
+    template_name = 'clinic/appointment_form.html'
+    success_url = reverse_lazy('appointment-list')
+    success_message = "Appointment was created successfully!"
+
+class AppointmentUpdateView(SuccessMessageMixin, UpdateView):
+    model = Appointment
+    fields = ['pet', 'vet', 'date', 'reason']
+    template_name = 'clinic/appointment_form.html'
+    success_url = reverse_lazy('appointment-list')
+    success_message = "Appointment was updated successfully!"
+
+class AppointmentDeleteView(SuccessMessageMixin, DeleteView):
+    model = Appointment
+    template_name = 'clinic/appointment_confirm_delete.html'
+    success_url = reverse_lazy('appointment-list')
+    success_message = "Appointment was deleted successfully."
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super().delete(request, *args, **kwargs)

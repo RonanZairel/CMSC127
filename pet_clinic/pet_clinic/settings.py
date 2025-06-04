@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -86,6 +88,19 @@ DATABASES = {
     }
 }
 
+
+# settings.py
+
+# Base URL for static files
+STATIC_URL = '/static/'
+
+# Where Django will collect static files for production (when you run collectstatic)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Additional directories to search for static files (during development)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'clinic/static'),  # Path to your app's static folder
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
