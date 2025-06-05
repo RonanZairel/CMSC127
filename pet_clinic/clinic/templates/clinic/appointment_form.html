@@ -1,52 +1,187 @@
+<!-- clinic/templates/clinic/appointment_form.html -->
 {% extends 'clinic/base.html' %}
-{% block title %}{% if object %}Edit{% else %}New{% endif %} Appointment{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header" style="background-color: var(--ucla-blue); color: white;">
-                <h2 class="mb-0">
-                    {% if object %}Edit Appointment{% else %}Book New Appointment{% endif %}
-                </h2>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="pet" class="form-label">Pet</label>
-                            {{ form.pet }}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="vet" class="form-label">Vet</label>
-                            {{ form.vet }}
-                        </div>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>{% if object %}Edit{% else %}New{% endif %} Appointment</h3>
+                </div>
+                <div class="card-body">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Error!</strong> Please correct the following:
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
                     </div>
+                    {% endif %}
                     
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="datetime-local" class="form-control" 
-                                   name="date" id="id_date" 
-                                   value="{{ form.date.value|default:''|date:'Y-m-d\TH:i' }}">
+                    <form method="post" id="appointment-form">
+                        {% csrf_token %}
+                        {{ form.vet_id }}
+                        
+                        <div class="mb-3">
+                            <label for="id_pet" class="form-label">Pet</label>
+                            <select name="pet" class="form-control" required id="id_pet">
+                                {% for pet in form.pet.field.queryset %}
+                                    <option value="{{ pet.pk }}" {% if form.pet.value == pet.pk %}selected{% endif %}>
+                                        {{ pet.name }} ({{ pet.species }})
+                                    </option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="col-md-6">
-                            <label for="reason" class="form-label">Reason</label>
-                            {{ form.reason }}
+                        
+                        <div class="mb-3">
+                            <label for="id_reason" class="form-label">Reason</label>
+                            <select name="reason" class="form-control" required id="id_reason">
+                                {% for value, label in form.reason.field.choices %}
+                                    <option value="{{ value }}" {% if form.reason.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
                         </div>
-                    </div>
-                    
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% url 'appointment-list' %}" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary">
-                            {% if object %}Update{% else %}Create{% endif %} Appointment
-                        </button>
-                    </div>
-                </form>
+                        
+                        <div class="mb-3">
+                            <label for="id_vet" class="form-label">Veterinarian</label>
+                            <select class="form-control" required id="id_vet">
+                                <option value="" selected>Select a reason first</option>
+                            </select>
+                            <small class="text-muted">Select a reason to see available veterinarians</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_date" class="form-label">Date and Time</label>
+                            <input type="datetime-local" name="date" class="form-control" required 
+                                   id="id_date" value="{{ form.date.value|default:'' }}">
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'appointment-list' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary" id="submit-btn">Save</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reasonSelect = document.getElementById('id_reason');
+    const vetSelect = document.getElementById('id_vet');
+    const vetIdInput = document.getElementById('id_vet_id');  // Changed to match Django's auto ID
+    const form = document.getElementById('appointment-form');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // Map reasons to specializations
+    const reasonToSpec = {
+        'Surgery': 'Surgery',
+        'Emergency Care': 'Emergency Care',
+        'Dental Cleaning': 'Dentistry',
+        'Vaccination': 'General Practice',
+        'Check-up': 'General Practice',
+        'Dermatology': 'Dermatology'
+    };
+    
+    // Function to load vets based on reason
+    function loadVets(reason) {
+        if (!reason) {
+            vetSelect.innerHTML = '<option value="" selected>Select a reason first</option>';
+            vetIdInput.value = '';
+            return;
+        }
+        
+        const specialization = reasonToSpec[reason];
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+        
+        fetch(`/api/vets/?specialization=${encodeURIComponent(specialization)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                vetSelect.innerHTML = '';
+                vetIdInput.value = '';
+                
+                if (data.vets && data.vets.length > 0) {
+                    // Add empty default option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select a veterinarian';
+                    vetSelect.appendChild(defaultOption);
+                    
+                    // Add vet options
+                    data.vets.forEach(vet => {
+                        const option = document.createElement('option');
+                        option.value = vet.id;
+                        option.textContent = vet.name;
+                        vetSelect.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No available vets for this service';
+                    vetSelect.appendChild(option);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading vets:', error);
+                vetSelect.innerHTML = '';
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Error loading vets. Please try again.';
+                vetSelect.appendChild(option);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save';
+            });
+    }
+    
+    // When vet selection changes, update the hidden input
+    vetSelect.addEventListener('change', function() {
+        vetIdInput.value = this.value;
+    });
+    
+    // Load vets when reason changes
+    reasonSelect.addEventListener('change', function() {
+        loadVets(this.value);
+    });
+    
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+        if (!vetIdInput.value) {
+            e.preventDefault();
+            alert('Please select a veterinarian');
+            return false;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+        return true;
+    });
+    
+    // Initialize vet selection if editing
+    {% if form.reason.value %}
+        loadVets('{{ form.reason.value }}');
+        // Set the selected vet if editing
+        {% if form.instance.vet %}
+            setTimeout(() => {
+                vetSelect.value = '{{ form.instance.vet.pk }}';
+                vetIdInput.value = '{{ form.instance.vet.pk }}';
+            }, 500);
+        {% endif %}
+    {% endif %}
+});
+</script>
 {% endblock %}

@@ -1,49 +1,55 @@
+<!-- clinic/templates/clinic/appointment_list.html -->
 {% extends 'clinic/base.html' %}
-{% block title %}Appointments{% endblock %}
+
+{% block title %}My Appointments{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Appointment Management</h1>
-    <a href="{% url 'appointment-create' %}" class="btn btn-primary">
-        + New Appointment
-    </a>
-</div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Appointments</h2>
+        <a href="{% url 'appointment-create' %}" class="btn btn-primary">
+            <i class="bi bi-plus"></i> New Appointment
+        </a>
+    </div>
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Date</th>
-                <th>Pet</th>
-                <th>Owner</th>
-                <th>Vet</th>
-                <th>Reason</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for appointment in appointments %}
-            <tr>
-                <td>{{ appointment.date|date:"M d, Y h:i A" }}</td>
-                <td>{{ appointment.pet.name }}</td>
-                <td>{{ appointment.pet.owner.fname }} {{ appointment.pet.owner.lname }}</td>
-                <td>{{ appointment.vet.name }}</td>
-                <td>{{ appointment.reason }}</td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <a href="{% url 'appointment-update' appointment.pk %}" 
-                           class="btn btn-outline-primary">Edit</a>
-                        <a href="{% url 'appointment-delete' appointment.pk %}" 
-                           class="btn btn-outline-danger">Delete</a>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No appointments found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Pet</th>
+                    <th>Veterinarian</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.date|date:"M d, Y h:i A" }}</td>
+                    <td>{{ appointment.pet.name }}</td>
+                    <td>{{ appointment.vet.name }}</td>
+                    <td>{{ appointment.reason }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'appointment-update' appointment.pk %}" 
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'appointment-delete' appointment.pk %}" 
+                               class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i> Cancel
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No appointments scheduled.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

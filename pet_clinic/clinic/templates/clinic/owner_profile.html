@@ -1,0 +1,55 @@
+
+{% extends 'clinic/base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>My Profile</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="profile-pic mb-3">
+                                {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" class="rounded-circle" width="150" height="150">
+                                {% else %}
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:150px;height:150px;font-size:3rem;">
+                                    {{ user.first_name|first|upper }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ user.get_full_name }}</h4>
+                            <p><strong>Email:</strong> {{ user.email }}</p>
+                            <p><strong>Phone:</strong> {{ user.phone }}</p>
+                            <p><strong>Username:</strong> {{ user.username }}</p>
+                            
+                            <div class="mt-4">
+                                <h5>My Pets</h5>
+                                <ul>
+                                    {% for pet in user.pets.all %}
+                                    <li>
+                                        <a href="{% url 'pet-detail' pet.pk %}">{{ pet.name }}</a> ({{ pet.species }})
+                                    </li>
+                                    {% empty %}
+                                    <li>No pets registered</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'owner-update' %}" class="btn btn-primary">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

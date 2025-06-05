@@ -1,25 +1,89 @@
 {% extends 'clinic/base.html' %}
-{% block title %}{% if object %}Edit{% else %}New{% endif %} Pet{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h3>{% if object %}Edit{% else %}Add New{% endif %} Pet</h3>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                        <a href="{% if object %}{% url 'pet-detail' object.pk %}{% else %}{% url 'pet-list' %}{% endif %}" 
-                           class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </form>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>{% if object %}Edit{% else %}New{% endif %} Pet</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.name.label_tag }}
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="species-select" class="form-label">Species</label>
+                            {{ form.species }}
+                            {{ form.custom_species }}
+                            {% if form.species.errors or form.custom_species.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.species.errors.as_text }}
+                                    {{ form.custom_species.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.breed.label_tag }}
+                            {{ form.breed }}
+                            {% if form.breed.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.breed.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.photo.label_tag }}
+                            {{ form.photo }}
+                            {% if form.photo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.photo.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'pet-list' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const speciesSelect = document.getElementById('species-select');
+    const customSpeciesField = document.getElementById('custom-species');
+    
+    // Show/hide custom species field based on selection
+    speciesSelect.addEventListener('change', function() {
+        if (this.value === 'Other') {
+            customSpeciesField.style.display = 'block';
+            customSpeciesField.required = true;
+        } else {
+            customSpeciesField.style.display = 'none';
+            customSpeciesField.required = false;
+            customSpeciesField.value = '';
+        }
+    });
+    
+    if (speciesSelect.value === 'Other') {
+        speciesSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
 {% endblock %}

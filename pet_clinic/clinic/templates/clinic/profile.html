@@ -1,0 +1,60 @@
+{% extends 'clinic/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Your Profile</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+                
+                {% if user.is_vet %}
+                <hr>
+                <h4>Your Specializations</h4>
+                <ul>
+                    {% for spec in user.vet.specializations.all %}
+                    <li>{{ spec.name }}</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'add-specialization' %}" class="btn btn-sm btn-outline-primary">
+                    Add Specialization
+                </a>
+                {% endif %}
+                
+                {% if user.is_owner %}
+                <hr>
+                <h4>Your Pets</h4>
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for pet in user.owner.pets.all %}
+                    <div class="col">
+                        <div class="card h-100 pet-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ pet.name }}</h5>
+                                <p class="card-text">
+                                    <span class="badge rounded-pill mb-2" style="background-color: var(--ucla-blue);">
+                                        {{ pet.species }}
+                                    </span>
+                                    <br>
+                                    <strong>Breed:</strong> {{ pet.breed }}
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'pet-detail' pet.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'pet-create' %}" class="btn btn-primary mt-3">Add New Pet</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
