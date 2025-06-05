@@ -875,8 +875,12 @@ document.addEventListener('DOMContentLoaded', () => {
             phone: document.getElementById('phone').value.trim(),
             password: document.getElementById('signupPassword').value
         };
-        if (!userData.firstName || !userData.lastName || !userData.email || !userData.phone || userData.password.length < 6) {
-            showMessage('Please fill all required fields. Password must be at least 6 characters.', 'error');
+        if (!userData.firstName || !userData.lastName || !userData.email || !userData.phone || !userData.password) {
+            showMessage('Please fill all required fields marked with an asterisk (*).', 'error');
+            return;
+        }
+        if (userData.password.length < 6){
+            showMessage('Password must be at least 6 characters', 'error');
             return;
         }
         signup(userData);
