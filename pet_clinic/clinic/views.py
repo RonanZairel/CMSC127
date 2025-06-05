@@ -166,16 +166,15 @@ class AppointmentDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return super().get_queryset().filter(pet__owner=self.request.user)
 
+
 class OwnerRegisterView(CreateView):
     form_class = OwnerRegistrationForm
     template_name = 'clinic/owner_register.html'
     success_url = reverse_lazy('clinic-home')
 
     def form_valid(self, form):
-        # Save the user first
         user = form.save()
         
-        # Authenticate and login the user
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password1')
         user = authenticate(username=username, password=password)
@@ -186,31 +185,9 @@ class OwnerRegisterView(CreateView):
                 self.request,
                 f'Welcome {user.get_full_name()}! Your account has been created successfully.'
             )
-            
-            # Send welcome email (optional)
-            self.send_welcome_email(user)
+
         
         return super().form_valid(form)
-
-    def send_welcome_email(self, user):
-        # This is optional - remove if you don't want emails
-        from django.core.mail import send_mail
-        subject = 'Welcome to PetCare Clinic'
-        message = f'''
-        Hi {user.first_name},
-        
-        Thank you for registering with PetCare Clinic!
-        
-        You can now:
-        - Add your pets to our system
-        - Book appointments with our vets
-        - View your pet's medical history
-        
-        We're excited to care for your furry friends!
-        
-        The PetCare Team
-        '''
-        user.email_user(subject, message)
 
 class OwnerLoginView(LoginView):
     template_name = 'clinic/owner_login.html'
