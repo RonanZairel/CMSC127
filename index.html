@@ -17,10 +17,10 @@
                 <span>Pawsitibo Clinic</span>
             </div>
             <div class="nav-menu">
-                <a href="#home" class="nav-link">Home</a>
-                <a href="#services" class="nav-link">Services</a>
-                <a href="#vets" class="nav-link">Our Vets</a>
-                <a href="#about" class="nav-link">About</a>
+                <a href="#home" class="nav-link main-site-nav-link">Home</a>
+                <a href="#services" class="nav-link main-site-nav-link">Services</a>
+                <a href="#vets" class="nav-link main-site-nav-link">Our Vets</a>
+                <a href="#about" class="nav-link main-site-nav-link">About</a>
                 <div class="auth-buttons">
                     <button class="btn-secondary" id="loginNavBtn">Login</button>
                     <button class="btn-primary" id="signupNavBtn">Sign Up</button>
@@ -151,15 +151,15 @@
                 </div>
                 <div class="form-group">
                     <label for="middleInitial">Middle Initial</label>
-                    <input type="text" id="middleInitial" placeholder="e.g., A" maxlength="1">
+                    <input type="text" id="middleInitial" placeholder="e.g., A." maxlength="5">
                 </div>
                 <div class="form-group">
                     <label for="lastName">Last Name<span class="required-asterisk">*</span></label>
-                    <input type="text" id="suffix" placeholder="e.g., Jr., Sr., III" required>
+                    <input type="text" id="lastName" placeholder="e.g., Dela Cruz" required>
                 </div>
                 <div class="form-group">
                     <label for="suffix">Suffix</label>
-                    <input type="text" id="lastName" placeholder="e.g., Dela Cruz" required>
+                    <input type="text" id="suffix" placeholder="e.g., Jr., Sr., III">
                 </div>
                 <div class="form-group">
                     <label for="signupEmail">Email<span class="required-asterisk">*</span></label>
@@ -167,7 +167,7 @@
                 </div>
                 <div class="form-group">
                     <label for="phone">Phone Number<span class="required-asterisk">*</span></label>
-                    <input type="tel" id="phone" placeholder="e.g., 555-123-4567" required>
+                    <input type="tel" id="phone" placeholder="e.g., 09123456789" required>
                 </div>
                 <div class="form-group">
                     <label for="signupPassword">Password<span class="required-asterisk">*</span></label>
@@ -318,11 +318,11 @@
             <form id="addPetForm">
                 <input type="hidden" id="editingPetId">
                 <div class="form-group">
-                    <label for="petName">Pet Name</label>
+                    <label for="petName">Pet Name<span class="required-asterisk">*</span></label>
                     <input type="text" id="petName" required>
                 </div>
                 <div class="form-group">
-                    <label for="species">Species</label>
+                    <label for="species">Species<span class="required-asterisk">*</span></label>
                     <select id="species" required>
                         <option value="">Select species...</option>
                         <option value="Dog">Dog</option>
@@ -333,11 +333,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="breed">Breed</label>
+                    <label for="breed">Breed<span class="required-asterisk">*</span></label>
                     <input type="text" id="breed" required>
                 </div>
                 <div class="form-group">
-                    <label for="age">Age (years)</label>
+                    <label for="age">Age (years)<span class="required-asterisk">*</span></label>
                     <input type="number" id="age" min="0" required>
                 </div>
                 <button type="submit" class="btn-primary" id="petFormSubmitBtn">Add Pet</button>

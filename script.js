@@ -240,7 +240,7 @@ function signup(userData) {
     return true;
 }
 
-function logout() {
+/* function logout() {
     currentUser = null;
     editingPetId = null;
     editingVetId = null;
@@ -249,6 +249,25 @@ function logout() {
     showHomepageSections();
     showMessage('Logged out successfully!');
     updateNavForLoggedOutUser();
+    document.getElementById('loginForm').reset();
+    document.getElementById('signupForm').reset();
+    closeMobileMenu(); 
+}
+*/ 
+
+function logout() {
+    currentUser = null;
+    editingPetId = null;
+    editingVetId = null;
+    editingAppointmentId = null;
+    hideAllDashboards();
+    showHomepageSections(); // This already makes homepage sections visible
+
+    // Show main site nav links and auth buttons again on logout
+    document.querySelectorAll('.main-site-nav-link').forEach(link => link.style.display = ''); // Revert to stylesheet display
+    updateNavForLoggedOutUser(); // This shows the auth buttons
+
+    showMessage('Logged out successfully!');
     document.getElementById('loginForm').reset();
     document.getElementById('signupForm').reset();
     closeMobileMenu(); 
@@ -273,6 +292,9 @@ function updateNavForLoggedOutUser() {
 function showDashboard() {
     hideHomepageSections();
     closeMobileMenu();
+    document.querySelectorAll('.main-site-nav-link').forEach(link => link.style.display = 'none');
+    const authButtons = document.querySelector('.nav-menu .auth-buttons'); // From updateNavForLoggedInUser
+    if (authButtons) authButtons.style.display = 'none';
     if (currentUser.isAdmin) {
         document.getElementById('userDashboard').style.display = 'none';
         document.getElementById('adminDashboard').style.display = 'block';
@@ -298,7 +320,8 @@ function hideHomepageSections() {
 function showHomepageSections() {
     ['home', 'services', 'vets', 'about'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'block';
+        if (el) 
+            el.style.display = '';
     });
     loadVetsDisplay(); 
 }
@@ -875,8 +898,12 @@ document.addEventListener('DOMContentLoaded', () => {
             phone: document.getElementById('phone').value.trim(),
             password: document.getElementById('signupPassword').value
         };
-        if (!userData.firstName || !userData.lastName || !userData.email || !userData.phone || userData.password.length < 6) {
-            showMessage('Please fill all required fields. Password must be at least 6 characters.', 'error');
+        if (!userData.firstName || !userData.lastName || !userData.email || !userData.phone || !userData.password) {
+            showMessage('Please fill all required fields marked with an asterisk (*).', 'error');
+            return;
+        }
+        if (userData.password.length < 6){
+            showMessage('Password must be at least 6 characters', 'error');
             return;
         }
         signup(userData);

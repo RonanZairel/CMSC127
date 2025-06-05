@@ -631,12 +631,11 @@ section {
 }
 
 .pets-list, .admin-list {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     width: 100%;
-    max-width: none;
-    justify-items: center;
-    align-items: start;
+    min-width: 0;
 }
 
 .pet_card {
@@ -769,10 +768,18 @@ section {
 }
 
 /* appointments */
-.appointments-list {
+/*.appointments-list {
     display: flex;
     flex-direction: column;
     gap: 20px; 
+}*/ 
+
+.appointments-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+    min-width: 0;
 }
 
 .appointment-card {
@@ -1070,11 +1077,12 @@ section {
 
 
     .pets-list, .admin-list {
-        /*grid-template-columns: 1fr;*/
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        /*grid-template-columns: 1fr;*/ 
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 20px;
         width: 100%;
-        max-width: none;
+        min-width: 0;
 
     }
 
