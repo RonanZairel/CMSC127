@@ -23,7 +23,8 @@ const API = {
     deleteVet: '/api/vets/delete/',
     appointments: '/api/appointments/',
     bookAppointment: '/api/appointments/book/',
-    updateAppointmentStatus: '/api/appointments/'
+    updateAppointmentStatus: '/api/appointments/',
+    checkSession: '/api/check-session/'
 };
 
 // utility functions
@@ -301,20 +302,28 @@ async function logoutUser() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
             }
         });
-        const data = await response.json();
-        if (data.status === 'success') {
+        const responseData = await response.json();
+        if (responseData.status === 'success') {
             currentUser = null;
             hideAllDashboards();
             showHomepageSections();
-            showMessage('Logged out successfully!');
             updateNavForLoggedOutUser();
-            document.getElementById('loginForm').reset();
-            document.getElementById('signupForm').reset();
-            closeMobileMenu();
+            showMessage('Logged out successfully');
+            // Reset the display of the homepage sections
+            document.getElementById('home').style.display = 'block';
+            document.getElementById('services').style.display = 'block';
+            document.getElementById('vets').style.display = 'block';
+            document.getElementById('about').style.display = 'block';
+            // Show the navigation bar
+            document.querySelector('nav').style.display = 'flex';
+        } else {
+            showMessage(responseData.message || 'Logout failed', 'error');
         }
     } catch (error) {
+        console.error('Logout error:', error);
         showMessage('An error occurred during logout', 'error');
     }
 }
@@ -363,7 +372,7 @@ function hideHomepageSections() {
 function showHomepageSections() {
     ['home', 'services', 'vets', 'about'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'block';
+        if (el) el.style.display = '';
     });
     loadVetsDisplay(); 
 }
@@ -418,6 +427,7 @@ async function showUserTab(tabName, appointmentToEditId = null) {
             appointmentStatusGroup.style.display = 'none';
         }
     }
+    localStorage.setItem('lastUserTab', tabName);
 }
 
 function showAdminTab(tabName, itemToEditId = null) {
@@ -443,6 +453,7 @@ function showAdminTab(tabName, itemToEditId = null) {
         // The current HTML doesn't have an "edit" button on admin appointment list that links to the booking form.
         // It has cancel/edit (edit could be for status).
     }
+    localStorage.setItem('lastAdminTab', tabName);
 }
 
 
@@ -1376,6 +1387,7 @@ function closeMobileMenu() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+    checkUserSession();
     document.getElementById('loginNavBtn').addEventListener('click', showLoginModal);
     document.getElementById('signupNavBtn').addEventListener('click', showSignupModal);
     document.getElementById('heroBookAppointmentBtn').addEventListener('click', showBookingPromptModal);
@@ -1455,3 +1467,85 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavForLoggedOutUser(); 
 });
 
+async function checkUserSession() {
+    try {
+        const response = await fetch(API.checkSession);
+        const data = await response.json();
+        console.log('Session check response:', data);
+        if (data.isLoggedIn) {
+            currentUser = data.user;
+            document.querySelector('nav').style.display = 'none';
+            if (data.user.role === 'admin') {
+                document.getElementById('adminDashboard').style.display = 'block';
+                document.getElementById('userDashboard').style.display = 'none';
+                
+                const adminNameElement = document.getElementById('adminName');
+                if (adminNameElement) {
+                    adminNameElement.textContent = currentUser.name;
+                }
+                await loadAdminData();
+                showAdminTab(localStorage.getItem('lastAdminTab') || 'pets');
+            } else {
+                document.getElementById('userDashboard').style.display = 'block';
+                document.getElementById('adminDashboard').style.display = 'none';
+                const userNameElement = document.getElementById('userName');
+                if (userNameElement) {
+                    userNameElement.textContent = currentUser.name;
+                }
+                await loadUserData();
+                showUserTab(localStorage.getItem('lastUserTab') || 'pets');
+            }
+            // Ensure the dashboard is visible and homepage sections are hidden
+            document.getElementById('home').style.display = 'none';
+            document.getElementById('services').style.display = 'none';
+            document.getElementById('vets').style.display = 'none';
+            document.getElementById('about').style.display = 'none';
+        } else {
+            showHomepageSections();
+            updateNavForLoggedOutUser();
+            document.querySelector('nav').style.display = '';
+            console.log('Navigation bar display set to:', document.querySelector('nav').style.display);
+        }
+    } catch (error) {
+        console.error('Session check error:', error);
+        showMessage('An error occurred while checking the session', 'error');
+    }
+}
+
+async function addPet(event) {
+    event.preventDefault();
+    const name = document.getElementById('petName').value;
+    const species = document.getElementById('petSpecies').value;
+    const breed = document.getElementById('petBreed').value;
+    const age = document.getElementById('petAge').value;
+    const weight = document.getElementById('petWeight').value;
+    const owner = document.getElementById('petOwner').value;
+
+    if (!name || !species || !breed || !age || !weight || !owner) {
+        showMessage('Please fill in all fields', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(API.pets, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ name, species, breed, age, weight, owner })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            showMessage('Pet added successfully!', 'success');
+            await loadUserData();
+            hideModal('addPetModal');
+        } else {
+            showMessage(data.message || 'Failed to add pet', 'error');
+        }
+    } catch (error) {
+        console.error('Add pet error:', error);
+        showMessage('An error occurred while adding the pet', 'error');
+    }
+}

@@ -825,3 +825,16 @@ def delete_vet(request, vet_id):
         'status': 'error',
         'message': 'Invalid request method'
     })
+
+def check_session(request):
+    if request.user.is_authenticated:
+        return JsonResponse({
+            'isLoggedIn': True,
+            'user': {
+                'id': request.user.id,
+                'name': request.user.get_full_name() or request.user.username,
+                'role': 'admin' if request.user.is_staff else 'user'
+            }
+        })
+    else:
+        return JsonResponse({'isLoggedIn': False})

@@ -631,12 +631,11 @@ section {
 }
 
 .pets-list, .admin-list {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     width: 100%;
-    max-width: none;
-    justify-items: center;
-    align-items: start;
+    min-width: 0;
 }
 
 .pet_card {
@@ -769,10 +768,18 @@ section {
 }
 
 /* appointments */
-.appointments-list {
+/*.appointments-list {
     display: flex;
     flex-direction: column;
     gap: 20px; 
+}*/ 
+
+.appointments-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+    min-width: 0;
 }
 
 .appointment-card {
@@ -839,42 +846,6 @@ section {
     margin-top: 20px;
 }
 
-.appointment-actions button {
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-}
-
-.appointment-actions .btn-edit {
-    background: var(--light-french-beige);
-    color: var(--milk-chocolate);
-}
-
-.appointment-actions .btn-edit:hover {
-    background: var(--steel-teal);
-    color: var(--white);
-}
-
-.appointment-actions .btn-delete {
-    background: var(--copper-red);
-    color: var(--white);
-}
-
-.appointment-actions .btn-delete:hover {
-    background: var(--steel-teal);
-}
-
-.appointment-actions button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.appointment-detail span.status-badge {
-    color: inherit;
-}
-
 /* booking form */
 .booking-form {
     background: var(--white);
@@ -898,8 +869,6 @@ section {
     text-transform: uppercase;
     display: inline-block; 
     text-align: center;
-    background-color: var(--light-french-beige);
-    color: var(--milk-chocolate);
 }
 
 .status-confirmed {
@@ -1108,11 +1077,12 @@ section {
 
 
     .pets-list, .admin-list {
-        /*grid-template-columns: 1fr;*/
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        /*grid-template-columns: 1fr;*/ 
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 20px;
         width: 100%;
-        max-width: none;
+        min-width: 0;
 
     }
 
