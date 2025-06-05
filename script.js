@@ -298,7 +298,8 @@ function hideHomepageSections() {
 function showHomepageSections() {
     ['home', 'services', 'vets', 'about'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'block';
+        if (el) 
+            el.style.display = '';
     });
     loadVetsDisplay(); 
 }
