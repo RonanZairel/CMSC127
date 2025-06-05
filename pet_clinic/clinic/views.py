@@ -2,7 +2,7 @@ from django.views.generic import (
     ListView, DetailView, CreateView,
     UpdateView, DeleteView
 )
-from .models import Pet, Vet, Appointment, Owner
+from .models import Pet, Vet, Appointment, Owner, Specialization
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render
@@ -253,8 +253,14 @@ def get_pets(request):
         return JsonResponse({'status': 'error', 'message': 'Not authenticated'})
     
     try:
-        owner = Owner.objects.get(email=request.user.email)
-        pets = Pet.objects.filter(owner=owner)
+        if request.user.is_staff:
+            # Admin can see all pets
+            pets = Pet.objects.all()
+        else:
+            # Regular users can only see their own pets
+            owner = Owner.objects.get(email=request.user.email)
+            pets = Pet.objects.filter(owner=owner)
+
         return JsonResponse({
             'status': 'success',
             'pets': [{
@@ -263,7 +269,8 @@ def get_pets(request):
                 'species': pet.get_species_display(),  # Get the display value
                 'breed': pet.breed,
                 'age': pet.age,
-                'ownerId': pet.owner.id
+                'ownerId': pet.owner.id,
+                'ownerName': f"{pet.owner.fname} {pet.owner.lname}" if request.user.is_staff else None
             } for pet in pets]
         })
     except Owner.DoesNotExist:
@@ -364,8 +371,14 @@ def get_appointments(request):
         return JsonResponse({'status': 'error', 'message': 'Not authenticated'})
     
     try:
-        owner = Owner.objects.get(email=request.user.email)
-        appointments = Appointment.objects.filter(pet__owner=owner)
+        if request.user.is_staff:
+            # Admin can see all appointments
+            appointments = Appointment.objects.all()
+        else:
+            # Regular users can only see their own appointments
+            owner = Owner.objects.get(email=request.user.email)
+            appointments = Appointment.objects.filter(pet__owner=owner)
+
         return JsonResponse({
             'status': 'success',
             'appointments': [{
@@ -377,7 +390,8 @@ def get_appointments(request):
                 'date': apt.date.strftime('%Y-%m-%d'),
                 'time': apt.date.strftime('%H:%M'),
                 'reason': apt.reason,
-                'status': apt.status  # This should be 'confirmed' by default
+                'status': apt.status,
+                'ownerName': f"{apt.pet.owner.fname} {apt.pet.owner.lname}" if request.user.is_staff else None
             } for apt in appointments]
         })
     except Owner.DoesNotExist:
@@ -679,3 +693,135 @@ def delete_appointment(request, appointment_id):
             return JsonResponse({'status': 'error', 'message': str(e)})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+@csrf_exempt
+def update_vet(request, vet_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'status': 'error', 'message': 'Not authorized'})
+    
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            try:
+                vet = Vet.objects.get(id=vet_id)
+            except Vet.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Vet not found'})
+            
+            # Update vet fields
+            vet.name = data.get('name', vet.name)
+            vet.experience = data.get('experience', vet.experience)
+            vet.bio = data.get('bio', vet.bio)
+            
+            # Handle specializations
+            if 'specializations' in data:
+                # Clear existing specializations
+                vet.specializations.clear()
+                # Add new specializations
+                for spec_name in data['specializations']:
+                    spec, created = Specialization.objects.get_or_create(name=spec_name)
+                    vet.specializations.add(spec)
+            
+            vet.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'vet': {
+                    'id': vet.id,
+                    'name': vet.name,
+                    'specializations': [spec.name for spec in vet.specializations.all()],
+                    'experience': vet.experience,
+                    'bio': vet.bio
+                }
+            })
+        except Exception as e:
+            print(f"Error updating vet: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error updating vet: {str(e)}'
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
+
+@csrf_exempt
+def add_vet(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'status': 'error', 'message': 'Not authorized'})
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Create new vet
+            vet = Vet.objects.create(
+                name=data['name'],
+                experience=data.get('experience', 0),
+                bio=data.get('bio', 'No bio available')
+            )
+            
+            # Handle specializations
+            if 'specializations' in data:
+                for spec_name in data['specializations']:
+                    spec, created = Specialization.objects.get_or_create(name=spec_name)
+                    vet.specializations.add(spec)
+            
+            return JsonResponse({
+                'status': 'success',
+                'vet': {
+                    'id': vet.id,
+                    'name': vet.name,
+                    'specializations': [spec.name for spec in vet.specializations.all()],
+                    'experience': vet.experience,
+                    'bio': vet.bio
+                }
+            })
+        except Exception as e:
+            print(f"Error adding vet: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error adding vet: {str(e)}'
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
+
+@csrf_exempt
+def delete_vet(request, vet_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'status': 'error', 'message': 'Not authorized'})
+    
+    if request.method == 'DELETE':
+        try:
+            try:
+                vet = Vet.objects.get(id=vet_id)
+            except Vet.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Vet not found'})
+            
+            # Check if vet has any appointments
+            if Appointment.objects.filter(vet=vet).exists():
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Cannot delete veterinarian with existing appointments'
+                })
+            
+            vet.delete()
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Veterinarian deleted successfully'
+            })
+        except Exception as e:
+            print(f"Error deleting vet: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error deleting vet: {str(e)}'
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })

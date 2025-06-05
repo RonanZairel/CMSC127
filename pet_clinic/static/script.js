@@ -22,7 +22,8 @@ const API = {
     updateVet: '/api/vets/update/',
     deleteVet: '/api/vets/delete/',
     appointments: '/api/appointments/',
-    bookAppointment: '/api/appointments/book/'
+    bookAppointment: '/api/appointments/book/',
+    updateAppointmentStatus: '/api/appointments/'
 };
 
 // utility functions
@@ -158,7 +159,7 @@ function showAddVetModal(vetId = null) {
         const vet = vets.find(v => v.id === vetId);
         if (vet) {
             document.getElementById('vetName').value = vet.name;
-            document.getElementById('specialization').value = vet.specialization; // assuming string, not array for simplicity
+            document.getElementById('specialization').value = Array.isArray(vet.specializations) ? vet.specializations.join(', ') : '';
             document.getElementById('experience').value = vet.experience;
             document.getElementById('bio').value = vet.bio;
             modalTitle.textContent = 'Edit Veterinarian Details';
@@ -459,41 +460,22 @@ async function loadAdminData() {
 }
 
 function createPetCardHTML(pet, isUserView = true) {
-    const owner = pets.find(u => u.id === pet.ownerId);
-    let ownerInfo = '';
-    if (!isUserView && owner) {
-        ownerInfo = `<div class="pet-detail"><span>Owner:</span><strong>${owner.firstName} ${owner.lastName}</strong></div>`;
-    }
-
-    // Check if current user has permission to edit/delete
-    const canEdit = currentUser && (currentUser.isAdmin || pet.ownerId === currentUser.id);
-    console.log('Pet:', pet);
-    console.log('Current User:', currentUser);
-    console.log('Can Edit:', canEdit);
-
     return `
-        <div class="pet-card" data-pet-id="${pet.id}">
-            <div class="pet-header">
+        <div class="admin-card pet-admin-card" data-pet-id="${pet.id}">
+            <div class="pet-card">
                 <div class="pet-avatar">
-                    <i class="fas fa-${pet.species.toLowerCase() === 'dog' ? 'dog' : pet.species.toLowerCase() === 'cat' ? 'cat' : 'paw'}"></i>
+                    <i class="fas fa-paw"></i>
                 </div>
-                <div class="pet-info">
-                    <h3>${pet.name}</h3>
-                    <div class="pet-breed">${pet.breed}</div>
-                </div>
-            </div>
-            <div class="pet-details">
-                <div class="pet-detail"><span>Species:</span><strong>${pet.species}</strong></div>
-                <div class="pet-detail"><span>Breed:</span><strong>${pet.breed}</strong></div>
-                ${pet.age !== null ? `<div class="pet-detail"><span>Age:</span><strong>${pet.age} years</strong></div>` : ''}
-                ${ownerInfo}
-            </div>
-            ${canEdit ? `
+                <h3>${pet.name}</h3>
+                <div class="pet-species">${pet.species}</div>
+                <p><strong>Breed:</strong> ${pet.breed}</p>
+                <p><strong>Age:</strong> ${pet.age || 'Not specified'} years</p>
+                ${!isUserView ? `<p><strong>Owner:</strong> ${pet.ownerName || 'Unknown'}</p>` : ''}
                 <div class="pet-actions">
                     <button class="btn-small btn-edit" onclick="handleEditPet(${pet.id})">Edit</button>
                     <button class="btn-small btn-delete" onclick="handleDeletePet(${pet.id})">Delete</button>
                 </div>
-            ` : ''}
+            </div>
         </div>`;
 }
 
@@ -505,14 +487,16 @@ async function loadUserPets() {
             pets = data.pets;
             const petsList = document.getElementById('petsList');
             petsList.innerHTML = '';
+            
             if (pets.length === 0) {
-                petsList.innerHTML = `<div class="empty-state"><i class="fas fa-paw"></i><h3>No pets registered yet</h3><p>Add your first pet to get started.</p><button class="btn-primary" onclick="showAddPetModal()">Add Your First Pet</button></div>`;
+                petsList.innerHTML = `<div class="empty-state"><i class="fas fa-paw"></i><h3>No pets registered</h3><p>Add your first pet to get started!</p><button class="btn-primary" onclick="showAddPetModal()">Add First Pet</button></div>`;
                 return;
             }
             pets.forEach(pet => petsList.innerHTML += createPetCardHTML(pet, true));
         }
     } catch (error) {
-        showMessage('Error loading pets', 'error');
+        console.error('Error loading pets:', error);
+        showMessage('Error loading pets. Please try again later.', 'error');
     }
 }
 
@@ -524,6 +508,7 @@ async function loadAdminPets() {
             pets = data.pets;
             const adminPetsList = document.getElementById('adminPetsList');
             adminPetsList.innerHTML = '';
+            
             if (pets.length === 0) {
                 adminPetsList.innerHTML = `<div class="empty-state"><i class="fas fa-paw"></i><h3>No pets in the system</h3><p>Pets will appear here as they are registered by users.</p></div>`;
                 return;
@@ -531,19 +516,22 @@ async function loadAdminPets() {
             pets.forEach(pet => adminPetsList.innerHTML += createPetCardHTML(pet, false));
         }
     } catch (error) {
-        showMessage('Error loading pets', 'error');
+        console.error('Error loading pets:', error);
+        showMessage('Error loading pets. Please try again later.', 'error');
     }
 }
 
 function createVetAdminCardHTML(vet) {
     return `
         <div class="admin-card vet-admin-card" data-vet-id="${vet.id}">
-            <div class="vet-card"> <!-- Re-use vet-card styling -->
-                <div class="pet-avatar vet-avatar"> <!-- Use pet-avatar for consistency, or vet-avatar if defined separately -->
+            <div class="vet-card">
+                <div class="pet-avatar vet-avatar">
                     <i class="fas fa-user-md"></i>
                 </div>
                 <h3>${vet.name}</h3>
-                <div class="vet-specialization">${vet.specialization}</div>
+                <div class="vet-specialization">
+                    ${Array.isArray(vet.specializations) ? vet.specializations.join(', ') : ''}
+                </div>
                 <p><strong>Experience:</strong> ${vet.experience} years</p>
                 <p class="vet-bio">${vet.bio}</p>
                 <div class="pet-actions">
@@ -625,16 +613,9 @@ async function loadAdminVets() {
 function createAppointmentCardHTML(appointment, isUserView = true) {
     const pet = pets.find(p => p.id === appointment.petId);
     const vet = vets.find(v => v.id === appointment.vetId);
-    let ownerInfo = '';
-    if (!isUserView && pet) { 
-        const owner = pets.find(u => u.id === pet.ownerId);
-        ownerInfo = `<div class="appointment-detail"><strong>Owner</strong><span>${owner ? `${owner.firstName} ${owner.lastName}` : 'Unknown'}</span></div>`;
-    }
     
     const petName = pet ? pet.name : 'Unknown Pet';
     const vetName = vet ? vet.name : 'Unknown Vet';
-
-    // Capitalize the first letter of the status
     const statusDisplay = appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1);
 
     let actionButtons = '';
@@ -652,35 +633,62 @@ function createAppointmentCardHTML(appointment, isUserView = true) {
                     <button class="btn-small btn-delete" onclick="handleDeleteAppointment(${appointment.id})">Delete</button>
                 </div>
             `;
+        }
+    } else {
+        // Admin view
+        if (appointment.status === 'confirmed') {
+            actionButtons = `
+                <div class="appointment-actions">
+                    <button class="btn-small btn-edit" onclick="handleUpdateAppointmentStatus(${appointment.id}, 'completed')">Mark Completed</button>
+                    <button class="btn-small btn-delete" onclick="handleCancelAppointment(${appointment.id}, true)">Cancel</button>
+                </div>
+            `;
         } else if (appointment.status === 'completed') {
             actionButtons = `
                 <div class="appointment-actions">
-                    <button class="btn-small btn-delete" disabled>Cancel</button>
+                    <button class="btn-small" disabled>Completed</button>
+                </div>
+            `;
+        } else if (appointment.status === 'cancelled') {
+            actionButtons = `
+                <div class="appointment-actions">
+                    <button class="btn-small btn-delete" onclick="handleDeleteAppointment(${appointment.id})">Delete</button>
                 </div>
             `;
         }
-    } else { 
-        actionButtons = `
-            <div class="appointment-actions">
-                <button class="btn-small btn-edit" onclick="handleAdminEditAppointmentStatus(${appointment.id})">Edit Status</button>
-                <button class="btn-small btn-delete" onclick="handleCancelAppointment(${appointment.id}, true)">Cancel</button>
-            </div>
-        `;
     }
 
     return `
         <div class="appointment-card" data-appointment-id="${appointment.id}">
-            <div class="appointment-info">
-                <h3>${petName} with ${vetName}</h3>
-                <div class="appointment-details">
-                    ${ownerInfo} 
-                    <div class="appointment-detail"><strong>Date</strong><span>${formatDate(appointment.date)}</span></div>
-                    <div class="appointment-detail"><strong>Time</strong><span>${formatTime(appointment.time)}</span></div>
-                    <div class="appointment-detail"><strong>Reason</strong><span>${appointment.reason || 'N/A'}</span></div>
-                    <div class="appointment-detail"><strong>Status</strong><span class="status-badge status-${appointment.status}">${statusDisplay}</span></div>
-                </div>
-                ${actionButtons}
+            <div class="appointment-header">
+                <h3>${petName}</h3>
+                <span class="appointment-status ${appointment.status}">${statusDisplay}</span>
             </div>
+            <div class="appointment-details">
+                <div class="appointment-detail">
+                    <strong>Date</strong>
+                    <span>${appointment.date}</span>
+                </div>
+                <div class="appointment-detail">
+                    <strong>Time</strong>
+                    <span>${appointment.time}</span>
+                </div>
+                <div class="appointment-detail">
+                    <strong>Veterinarian</strong>
+                    <span>${vetName}</span>
+                </div>
+                <div class="appointment-detail">
+                    <strong>Reason</strong>
+                    <span>${appointment.reason}</span>
+                </div>
+                ${!isUserView ? `
+                <div class="appointment-detail">
+                    <strong>Owner</strong>
+                    <span>${appointment.ownerName || 'Unknown'}</span>
+                </div>
+                ` : ''}
+            </div>
+            ${actionButtons}
         </div>`;
 }
 
@@ -701,7 +709,7 @@ async function loadUserAppointments() {
         }
     } catch (error) {
         console.error('Error loading appointments:', error);
-        showMessage('Error loading appointments', 'error');
+        showMessage('Error loading appointments. Please try again later.', 'error');
     }
 }
 
@@ -721,7 +729,8 @@ async function loadAdminAppointments() {
             appointments.forEach(app => adminAppointmentsList.innerHTML += createAppointmentCardHTML(app, false));
         }
     } catch (error) {
-        showMessage('Error loading appointments', 'error');
+        console.error('Error loading appointments:', error);
+        showMessage('Error loading appointments. Please try again later.', 'error');
     }
 }
 
@@ -986,16 +995,19 @@ function handleAddVetFormSubmit(event) {
     event.preventDefault();
     if (!currentUser || !currentUser.isAdmin) return;
 
+    const specializationText = document.getElementById('specialization').value.trim();
+    const specializations = specializationText.split(',').map(s => s.trim()).filter(s => s);
+
     const vetData = {
         name: document.getElementById('vetName').value.trim(),
-        specialization: document.getElementById('specialization').value.trim(),
+        specializations: specializations,
         experience: parseInt(document.getElementById('experience').value) || 0,
         bio: document.getElementById('bio').value.trim()
     };
 
     console.log('Submitting vet data:', vetData);
 
-    if (!vetData.name || !vetData.specialization || !vetData.bio) {
+    if (!vetData.name || specializations.length === 0 || !vetData.bio) {
         showMessage('Please fill all required fields for the veterinarian.', 'error');
         return;
     }
@@ -1031,8 +1043,8 @@ function handleAddVetFormSubmit(event) {
             showMessage('An error occurred while saving the veterinarian', 'error');
         });
     } catch (error) {
-        console.error('Error in handleAddVetFormSubmit:', error);
-        showMessage('An error occurred while saving the veterinarian', 'error');
+        console.error('Error in form submission:', error);
+        showMessage('An error occurred while submitting the form', 'error');
     }
 }
 
@@ -1043,19 +1055,30 @@ function handleEditVet(vetId) {
 
 function handleDeleteVet(vetId) {
     if (!currentUser || !currentUser.isAdmin) return;
-    const vet = vets.find(v => v.id === vetId);
-    if (!vet) return;
-
-    if (confirm(`Are you sure you want to delete ${vet.name}? This will also cancel appointments with this vet.`)) {
-        vets = vets.filter(v => v.id !== vetId);
-        // Option: Mark appointments with this vet as "Vet Unavailable" or remove them
-        appointments = appointments.filter(app => app.vetId !== vetId); 
-        showMessage('Veterinarian and their appointments deleted successfully!');
-        loadAdminVets();
-        loadVetsDisplay();
-        loadUserAppointments(); 
-        loadAdminAppointments();
-        loadBookingForm();
+    
+    if (confirm('Are you sure you want to delete this veterinarian? This action cannot be undone.')) {
+        fetch(`${API.deleteVet}${vetId}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showMessage('Veterinarian deleted successfully!');
+                loadAdminVets();
+                loadVetsDisplay();
+                loadBookingForm();
+            } else {
+                showMessage(data.message || 'Failed to delete veterinarian', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting veterinarian:', error);
+            showMessage('An error occurred while deleting the veterinarian', 'error');
+        });
     }
 }
 
@@ -1308,6 +1331,33 @@ async function handleDeleteAppointment(appointmentId) {
         } catch (error) {
             showMessage('An error occurred while deleting the appointment', 'error');
         }
+    }
+}
+
+async function handleUpdateAppointmentStatus(appointmentId, newStatus) {
+    if (!currentUser || !currentUser.isAdmin) return;
+    
+    try {
+        const response = await fetch(`${API.updateAppointmentStatus}${appointmentId}/update-status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+            showMessage('Appointment status updated successfully!');
+            await loadAdminAppointments();
+            await loadUserAppointments();
+        } else {
+            showMessage(data.message || 'Failed to update appointment status', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating appointment status:', error);
+        showMessage('An error occurred while updating the appointment status', 'error');
     }
 }
 
