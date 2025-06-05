@@ -168,7 +168,7 @@
                 </div>
                 <div class="form-group">
                     <label for="phone">Phone Number<span class="required-asterisk">*</span></label>
-                    <input type="tel" id="phone" placeholder="e.g., 555-123-4567" required>
+                    <input type="tel" id="phone" placeholder="e.g., 09123456789" required>
                 </div>
                 <div class="form-group">
                     <label for="signupPassword">Password<span class="required-asterisk">*</span></label>
@@ -250,7 +250,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="reason">Reason for Visit</label>
+                    <label for="reason">Reason for Visit<span class="required-asterisk">*</span></label>
                     <textarea id="reason" placeholder="Describe the reason for the appointment" required></textarea>
                 </div>
                  <div class="form-group" id="appointmentStatusGroup" style="display:none;">
@@ -319,11 +319,11 @@
             <form id="addPetForm">
                 <input type="hidden" id="editingPetId">
                 <div class="form-group">
-                    <label for="petName">Pet Name</label>
+                    <label for="petName">Pet Name<span class="required-asterisk">*</span></label>
                     <input type="text" id="petName" required>
                 </div>
                 <div class="form-group">
-                    <label for="species">Species</label>
+                    <label for="species">Species<span class="required-asterisk">*</span></label>
                     <select id="species" required>
                         <option value="">Select species...</option>
                         <option value="Dog">Dog</option>
@@ -334,12 +334,12 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="breed">Breed</label>
+                    <label for="breed">Breed<span class="required-asterisk">*</span></label>
                     <input type="text" id="breed" required>
                 </div>
                 <div class="form-group">
-                    <label for="age">Age (years)</label>
-                    <input type="number" id="age" min="0">
+                    <label for="age">Age (years)<span class="required-asterisk">*</span></label>
+                    <input type="number" id="age" min="0" required>
                 </div>
                 <button type="submit" class="btn-primary" id="petFormSubmitBtn">Add Pet</button>
             </form>
