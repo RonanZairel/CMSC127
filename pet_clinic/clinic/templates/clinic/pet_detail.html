@@ -63,6 +63,11 @@
             <div class="card-header">
                 <h3 class="mb-0">Appointment History</h3>
             </div>
+            {% if pet.photo %}
+            <div class="text-center mb-4">
+                <img src="{{ pet.photo.url }}" alt="{{ pet.name }}" class="img-fluid rounded" style="max-height: 300px;">
+            </div>
+            {% endif %}
             <div class="card-body">
                 {% if pet.appointments.all %}
                 <div class="list-group">

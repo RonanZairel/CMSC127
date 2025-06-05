@@ -1,32 +1,34 @@
-{% extends 'clinic/base.html' %}
-{% block title %}Our Vets{% endblock %}
-{% block content %}
-<h1 class="mb-4">Our Veterinary Team</h1>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    {% for vet in object_list %}
-    <div class="col">
-        <div class="card h-100 vet-card">
-            <div class="card-body">
-                <h3 class="card-title">{{ vet.name }}</h3>
-                <p class="card-text">
-                    <strong>Specializations:</strong>
-                    <ul class="list-unstyled">
+{% extends 'clinic/base.html' %}
+
+{% block title %}Our Vets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Our Veterinary Team</h1>
+    <div class="row mt-4">
+        {% for vet in object_list %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ vet.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Specializations:</h6>
+                    <ul>
                         {% for spec in vet.specializations.all %}
-                        <li>
-                            <span class="badge rounded-pill mb-1" style="background-color: var(--milk-chocolate);">
-                                {{ spec.name }}
-                            </span>
-                        </li>
+                        <li>{{ spec.name }}</li>
                         {% endfor %}
                     </ul>
-                </p>
-            </div>
-            <div class="card-footer bg-transparent">
-                <a href="#" class="btn btn-sm btn-outline-primary">View Schedule</a>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'vet-schedule' vet.pk %}" class="btn btn-sm btn-primary">
+                        View Schedule
+                    </a>
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}

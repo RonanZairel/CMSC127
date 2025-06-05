@@ -1,0 +1,31 @@
+
+{% extends 'clinic/base.html' %}
+
+{% block title %}{{ vet.name }}'s Schedule{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ vet.name }}'s Schedule</h2>
+    <div class="list-group mt-3">
+        {% for appointment in appointments %}
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h5>{{ appointment.pet.name }} ({{ appointment.pet.species }})</h5>
+                    <p class="mb-1">Owner: {{ appointment.pet.owner.get_full_name }}</p>
+                    <p class="mb-1">Reason: {{ appointment.reason }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="mb-1">{{ appointment.date|date:"F j, Y" }}</p>
+                    <p class="mb-1">{{ appointment.date|time:"g:i A" }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="list-group-item">
+            No appointments scheduled yet.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
